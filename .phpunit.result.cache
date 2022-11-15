@@ -1,0 +1,1 @@
+{"version":1,"defects":{"SensorTest::testGetTemp":8},"times":{"SensorTest::testGetTemp":0.007,"Balsama\\Tempbot\\SensorTest::testGetTemp":0.002,"Balsama\\Tempbot\\SensorTest::testGetId":0,"Balsama\\Tempbot\\SensorReadingTest::testGetTemp":0.002,"Balsama\\Tempbot\\SensorReadingTest::testGetId":0,"Balsama\\Tempbot\\SensorReadingTest::testGetHumidity":0}}
