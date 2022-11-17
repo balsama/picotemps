@@ -4,7 +4,8 @@
     "type": "project",
     "require": {
         "guzzlehttp/guzzle": "^7",
-        "revolution/laravel-google-sheets": "^6.0"
+        "revolution/laravel-google-sheets": "^6.0",
+        "catfan/medoo": "^2.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^10",

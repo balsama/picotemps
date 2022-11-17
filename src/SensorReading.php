@@ -11,6 +11,7 @@ class SensorReading
     private ?Response $response;
     private ?\stdClass $responseBody;
     private Client $client;
+    private string $responseType;
 
     public function __construct(string $sensorId, Client $client = new Client())
     {
@@ -18,12 +19,16 @@ class SensorReading
         $this->ip = Helpers::getSensorIpById($sensorId);
         $this->response = $this->getReading();
         $this->responseBody = ($this->response) ? json_decode($this->response->getBody()) : null;
+        $this->responseType = $this->getType();
     }
 
     public function getTemp()
     {
         if (!$this->response) {
             return null;
+        }
+        if ($this->responseType === 'weather.gov') {
+            return $this->responseBody->properties->relativeHumidity->value;
         }
         return Helpers::c2f($this->responseBody->temperature);
     }
@@ -32,6 +37,9 @@ class SensorReading
         if (!$this->response) {
             return null;
         }
+        if ($this->responseType === 'weather.gov') {
+            return $this->responseBody->properties->temperature->value;
+        }
         return $this->responseBody->humidity;
     }
     public function getTbId()
@@ -39,11 +47,23 @@ class SensorReading
         if (!$this->response) {
             return null;
         }
+        if ($this->responseType === 'weather.gov') {
+            $stationParts = explode('/', $this->responseBody->properties->station);
+            return end($stationParts);
+        }
         return $this->responseBody->id;
     }
 
     private function getReading(): ?Response
     {
         return Helpers::fetch($this->ip, $this->client);
+    }
+
+    private function getType(): string
+    {
+        if (!property_exists($this->responseBody, 'properties')) {
+            return 'lan';
+        }
+        return 'weather.gov';
     }
 }

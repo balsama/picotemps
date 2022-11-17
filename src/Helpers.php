@@ -5,6 +5,7 @@ namespace Balsama\Tempbot;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
+use Medoo\Medoo;
 use stdClass;
 
 class Helpers
@@ -41,51 +42,92 @@ class Helpers
             'TB0301' => '192.168.7.152',
             'TB0302' => '192.168.7.156',
             'TB0401' => '192.168.7.157',
+            'KBOS' => 'api.weather.gov/stations/KBOS/observations/latest',
         ];
     }
 
-    public static function getSensors(array $sensorIds): array
+    /**
+     * @return SensorReading[]
+     */
+    public static function getSensorReadings(array $sensorIds): array
     {
         $sensors = [];
         foreach ($sensorIds as $sensorId) {
             $sensors[$sensorId] = new SensorReading($sensorId);
         }
+        $sensors['KBOS'] = self::getExternalSensorReading();
         return $sensors;
     }
 
+    public static function getExternalSensorReading(string $sensorId = 'KBOS'): SensorReading
+    {
+        return new SensorReading($sensorId);
+    }
+
     /**
-     * @param SensorReading[] $sensor
+     * @param SensorReading[] $sensorReadings
      * @return void
      * @throws Exception
      */
-    public static function writeSensorsCsvLine(array $sensor): void
+    public static function writeSensorsCsvLine(array $sensorReadings): void
     {
         $date = new \DateTimeImmutable('now', new \DateTimeZone('America/New_York'));
         $datetime = $date->format('Y-m-d H:i:s');
 
         $outside = Helpers::getCurrentBostonObservations();
-        $outsideTemp = Helpers::c2f($outside->properties->temperature->value);
-        $outsideHumidity = $outside->properties->relativeHumidity->value;
+        if (!$outside->properties->relativeHumidity->value) {
+            // Sometimes the API returns this as null, in which case we can't pass it off to the converter.
+            $outsideTemp = null;
+        } else {
+            $outsideTemp = Helpers::c2f((float) $outside->properties->temperature->value);
+        }
+        if (!$outside->properties->relativeHumidity->value) {
+            $outsideHumidity = null;
+        } else {
+            $outsideHumidity = $outside->properties->relativeHumidity->value;
+        }
 
         $recordLine = new RecordEntry(
             $datetime,
             $outsideTemp,
             $outsideHumidity,
-            $sensor['TB0101']->getTemp(),
-            $sensor['TB0201']->getTemp(),
-            $sensor['TB0301']->getTemp(),
-            $sensor['TB0302']->getTemp(),
-            $sensor['TB0401']->getTemp(),
-            $sensor['TB0101']->getHumidity(),
-            $sensor['TB0201']->getHumidity(),
-            $sensor['TB0301']->getHumidity(),
-            $sensor['TB0302']->getHumidity(),
-            $sensor['TB0401']->getHumidity(),
+            $sensorReadings['TB0101']->getTemp(),
+            $sensorReadings['TB0201']->getTemp(),
+            $sensorReadings['TB0301']->getTemp(),
+            $sensorReadings['TB0302']->getTemp(),
+            $sensorReadings['TB0401']->getTemp(),
+            $sensorReadings['TB0101']->getHumidity(),
+            $sensorReadings['TB0201']->getHumidity(),
+            $sensorReadings['TB0301']->getHumidity(),
+            $sensorReadings['TB0302']->getHumidity(),
+            $sensorReadings['TB0401']->getHumidity(),
         );
 
         $csvLine = $recordLine->getArray();
 
         self::csv([], [$csvLine], 'temps.csv', true, __DIR__ . '/../data/');
+    }
+
+    public static function writeSensorReadingsDb(array $sensorReadings)
+    {
+        foreach ($sensorReadings as $sensorReading) {
+            self::writeSensorReadingDb($sensorReading);
+        }
+    }
+
+    public static function writeSensorReadingDb(SensorReading $sensorReading)
+    {
+        $database = Helpers::initializeDatabase();
+
+        $database->insert(
+            'sensor_record',
+            [
+                'sensor_id' => $sensorReading->getTbId(),
+                'timestamp' => time(),
+                'temperature' => $sensorReading->getTemp(),
+                'humidity' => $sensorReading->getHumidity(),
+            ]
+        );
     }
 
     /**
@@ -154,5 +196,24 @@ class Helpers
     public static function c2f(float $c): float
     {
         return ($c * 9 / 5) + 32;
+    }
+
+    public static function initializeDatabase(): Medoo
+    {
+
+        $database = new Medoo([
+            'type' => 'sqlite',
+            'database' => __DIR__ . '/../databases/picotemps.db'
+        ]);
+
+
+        $database->create('sensor_record', [
+            'sensor_id' => ['TEXT'],
+            'timestamp' => ['INTEGER'],
+            'temperature' => ['FLOAT'],
+            'humidity' => ['FLOAT'],
+        ]);
+
+        return $database;
     }
 }
