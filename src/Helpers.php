@@ -110,18 +110,29 @@ class Helpers
 
     public static function writeSensorReadingsDb(array $sensorReadings)
     {
+        $time = time();
+        $groupReadId = md5($time);
+        $database = Helpers::initializeDatabase();
+        $database->insert(
+            'group_read',
+            [
+                'groupReadId' => $groupReadId,
+                'timestamp' => $time,
+            ]
+        );
         foreach ($sensorReadings as $sensorReading) {
-            self::writeSensorReadingDb($sensorReading);
+            self::writeSensorReadingDb($sensorReading, $groupReadId);
         }
     }
 
-    public static function writeSensorReadingDb(SensorReading $sensorReading)
+    public static function writeSensorReadingDb(SensorReading $sensorReading, string $groupReadId)
     {
         $database = Helpers::initializeDatabase();
 
         $database->insert(
             'sensor_record',
             [
+                'groupReadId' => $groupReadId,
                 'sensor_id' => $sensorReading->getTbId(),
                 'timestamp' => time(),
                 'temperature' => $sensorReading->getTemp(),
@@ -207,7 +218,13 @@ class Helpers
         ]);
 
 
+        $database->create('group_read', [
+            'groupReadId' => ['TEXT'],
+            'timestamp' => ['INTEGER'],
+        ]);
+
         $database->create('sensor_record', [
+            'groupReadId' => ['TEXT'],
             'sensor_id' => ['TEXT'],
             'timestamp' => ['INTEGER'],
             'temperature' => ['FLOAT'],
@@ -217,7 +234,7 @@ class Helpers
         return $database;
     }
 
-    public static function getDbRecords(
+    public static function getDbRecordsByStationId(
         string $stationId,
         int $after = null,
         int $before = null
@@ -237,6 +254,19 @@ class Helpers
             $columns['timestamp[<]'] = $before;
         }
         $records = $database->select('sensor_record', $join, $columns);
+
+        return $records;
+    }
+
+    public static function getDbGroupsByTime(
+        int $after = null,
+        int $before = null
+    ): array {
+        // @todo
+        $database = Helpers::initializeDatabase();
+        $join = [];
+        $columns = [];
+        $records = $database->select('group_read', $join, $columns);
 
         return $records;
     }

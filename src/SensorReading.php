@@ -20,6 +20,7 @@ class SensorReading
         $this->response = $this->getReading();
         $this->responseBody = ($this->response) ? json_decode($this->response->getBody()) : null;
         $this->responseType = $this->getType();
+        // @todo Sensor Reading should provide its own timestamp.
     }
 
     public function getTemp()
