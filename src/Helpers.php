@@ -44,13 +44,13 @@ class Helpers
         ];
     }
 
-    public static function getSensors(array $sensorIds): array
+    public static function getSensorsReadings(array $sensorIds): array
     {
-        $sensors = [];
+        $sensorsReadings = [];
         foreach ($sensorIds as $sensorId) {
-            $sensors[$sensorId] = new SensorReading($sensorId);
+            $sensorsReadings[$sensorId] = new SensorReading($sensorId);
         }
-        return $sensors;
+        return $sensorsReadings;
     }
 
     /**

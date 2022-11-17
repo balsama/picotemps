@@ -11,7 +11,7 @@ const INTERVAL = 18;
 $i = 1;
 while(true) {
     $sensorIds = Helpers::getSensorIds();
-    $sensors = Helpers::getSensors($sensorIds);
+    $sensors = Helpers::getSensorsReadings($sensorIds);
     Helpers::writeSensorsCsvLine($sensors);
     echo "Wrote line $i\n";
     sleep(INTERVAL);
