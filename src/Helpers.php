@@ -216,4 +216,28 @@ class Helpers
 
         return $database;
     }
+
+    public static function getDbRecords(
+        string $stationId,
+        int $after = null,
+        int $before = null
+    ): array {
+        $database = Helpers::initializeDatabase();
+        $join = [
+            'sensor_id',
+            'timestamp',
+            'temperature',
+            'humidity',
+        ];
+        $columns['sensor_id'] = $stationId;
+        if ($after) {
+            $columns['timestamp[>]'] = $after;
+        }
+        if ($before) {
+            $columns['timestamp[<]'] = $before;
+        }
+        $records = $database->select('sensor_record', $join, $columns);
+
+        return $records;
+    }
 }
