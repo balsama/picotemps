@@ -57,7 +57,7 @@ class SensorReading
 
     private function getReading(): ?Response
     {
-        return Helpers::fetch($this->ip, $this->client);
+        return Helpers::fetch($this->ip, 1, $this->client);
     }
 
     private function getType(): string
