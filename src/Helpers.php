@@ -182,7 +182,7 @@ class Helpers
         return json_decode(self::fetch($url)->getBody());
     }
 
-    public static function fetch($url, Client $client = new Client()): ?Response
+    public static function fetch($url, $retry = 1, Client $client = new Client()): ?Response
     {
         try {
             return $client->get($url, [
@@ -190,6 +190,10 @@ class Helpers
                 'connect_timeout' => 6,
             ]);
         } catch (\Throwable $e) {
+            if ($retry) {
+                $retry--;
+                self::fetch($url, $retry, $client);
+            }
             if (in_array($url, self::getSensorIps())) {
                 $tbid = self::getSensorIdByIp($url);
                 echo $e->getMessage() . PHP_EOL;

@@ -62,6 +62,9 @@ class SensorReading
 
     private function getType(): string
     {
+        if (!$this->responseBody) {
+            return '';
+        }
         if (!property_exists($this->responseBody, 'properties')) {
             return 'lan';
         }
