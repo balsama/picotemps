@@ -5,7 +5,6 @@ namespace Balsama\Tempbot;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Psr7\Response;
 
 class HelpersTest extends \PHPUnit\Framework\TestCase
 {
@@ -34,13 +33,5 @@ class HelpersTest extends \PHPUnit\Framework\TestCase
         $handlerStack = HandlerStack::create($mock);
         $client = new Client(['handler' => $handlerStack]);
         $this->assertNull(Helpers::getCurrentBostonObservations($client));
-    }
-
-    public function testTempToColor()
-    {
-        for ($temp = 50; $temp < 101; $temp++) {
-            $colors[] = Helpers::tempToColor($temp);
-        }
-        $foo = 11;
     }
 }

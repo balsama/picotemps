@@ -49,7 +49,7 @@ class Helpers
     public static function availableSensor($host, $port = 80, $timeout = 3)
     {
         $fp = @fSockOpen($host, $port, $errno, $errstr, $timeout);
-        return $fp!=false;
+        return $fp != false;
     }
 
 
@@ -290,6 +290,9 @@ class Helpers
         return $sensorGraphData;
     }
 
+    /**
+     * This is copy pasta crap. Should be combined with the above function. Which is also crap.
+     */
     public static function tempToColor(float $value, int $min = 58, int $max = 72)
     {
         $gradientColors = array_reverse(self::gradient());
