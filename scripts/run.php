@@ -4,7 +4,7 @@ include_once __DIR__ . '/../vendor/autoload.php';
 
 use Balsama\Tempbot\Helpers;
 
-const INTERVAL = 18;
+const INTERVAL = 30;
 
 $i = 1;
 while(true) {
