@@ -34,7 +34,7 @@ class HelpersTest extends TestCase
         $handlerStack = HandlerStack::create($mock);
         $client = new Client(['handler' => $handlerStack]);
         $this->assertNull(Helpers::getCurrentBostonObservations($client));
-        $response = Helpers::fetch('example.com', 1, $client);
+        $response = Fetch::fetch('example.com', 1, $client);
         $this->assertNull($response);
     }
 }
