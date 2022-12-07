@@ -129,6 +129,7 @@ class Helpers
         foreach ($sensorReadings as $sensorReading) {
             self::writeSensorReadingDb($sensorReading, $groupReadId);
         }
+        TempBotLogger::logNotice('Wrote DB record. Group Read ID: ' . $groupReadId . '.');
     }
 
     public static function writeSensorReadingDb(SensorReading $sensorReading, string $groupReadId)
@@ -185,39 +186,10 @@ class Helpers
     public static function getCurrentBostonObservations(Client $client = new Client()): ?stdClass
     {
         $url = self::BOSTON_STATION_URL;
-        if ($response = self::fetch($url, 1, $client)) {
+        if ($response = Fetch::fetch($url, 1, $client)) {
             return json_decode($response->getBody());
         }
         return null;
-    }
-
-    public static function fetch(
-        string $url,
-        int $retry = 2,
-        Client $client = new Client()
-    ): ?Response {
-        try {
-            return $client->get($url, [
-                'timeout' => 6,
-                'connect_timeout' => 6,
-            ]);
-        } catch (\Throwable $e) {
-            if ($retry) {
-                $retry--;
-                return self::fetch($url, $retry, $client);
-            }
-            if (in_array($url, self::getSensorIps())) {
-                $tbid = self::getSensorIdByIp($url);
-                echo $e->getMessage() . PHP_EOL;
-                echo "Sensor '$tbid' appears to be unreachable at $url." . PHP_EOL;
-            } elseif ($url === self::BOSTON_STATION_URL) {
-                echo $e->getMessage() . PHP_EOL;
-                echo "Boston weather station appears to be unreachable at $url." . PHP_EOL;
-            } else {
-                echo $e->getMessage() . PHP_EOL;
-            }
-            return null;
-        }
     }
 
     public static function c2f(float $c): float
