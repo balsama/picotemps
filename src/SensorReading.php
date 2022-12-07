@@ -29,7 +29,10 @@ class SensorReading
             return null;
         }
         if ($this->responseType === 'weather.gov') {
-            return $this->responseBody->properties->relativeHumidity->value;
+            if ($this->responseBody->properties->temperature->value) {
+                return Helpers::c2f($this->responseBody->properties->temperature->value);
+            }
+            return null;
         }
         return Helpers::c2f($this->responseBody->temperature);
     }
@@ -39,7 +42,7 @@ class SensorReading
             return null;
         }
         if ($this->responseType === 'weather.gov') {
-            return $this->responseBody->properties->temperature->value;
+            return $this->responseBody->properties->relativeHumidity->value;
         }
         return $this->responseBody->humidity;
     }

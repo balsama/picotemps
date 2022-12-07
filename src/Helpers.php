@@ -37,16 +37,23 @@ class Helpers
     public static function sensorIpMap(): array
     {
         return [
-            'TB0101' => '192.168.7.154',
-            'TB0201' => '192.168.7.155',
+            'TB0101' => '192.168.7.161',
+            'TB0201' => '192.168.7.160',
             'TB0301' => '192.168.7.152',
             'TB0302' => '192.168.7.156',
-            'TB0401' => '192.168.7.157',
+            'TB0401' => '192.168.7.159',
             'KBOS' => 'api.weather.gov/stations/KBOS/observations/latest',
         ];
     }
 
-    /**
+    public static function availableSensor($host, $port = 80, $timeout = 3)
+    {
+        $fp = @fSockOpen($host, $port, $errno, $errstr, $timeout);
+        return $fp!=false;
+    }
+
+
+/**
      * @return SensorReading[]
      */
     public static function getSensorReadings(array $sensorIds): array
@@ -55,7 +62,6 @@ class Helpers
         foreach ($sensorIds as $sensorId) {
             $sensors[$sensorId] = new SensorReading($sensorId);
         }
-        $sensors['KBOS'] = self::getExternalSensorReading();
         return $sensors;
     }
 
@@ -176,13 +182,16 @@ class Helpers
         fclose($fp);
     }
 
-    public static function getCurrentBostonObservations(): stdClass
+    public static function getCurrentBostonObservations(Client $client = new Client()): ?stdClass
     {
         $url = self::BOSTON_STATION_URL;
-        return json_decode(self::fetch($url)->getBody());
+        if ($response = self::fetch($url, 1, $client)) {
+            return json_decode($response->getBody());
+        }
+        return null;
     }
 
-    public static function fetch($url, $retry = 1, Client $client = new Client()): ?Response
+    public static function fetch(string $url, int $retry = 1, Client $client = new Client()): ?Response
     {
         try {
             return $client->get($url, [
@@ -262,16 +271,121 @@ class Helpers
         return $records;
     }
 
-    public static function getDbGroupsByTime(
+    public static function getChartData(
         int $after = null,
         int $before = null
-    ): array {
-        // @todo
-        $database = Helpers::initializeDatabase();
-        $join = [];
-        $columns = [];
-        $records = $database->select('group_read', $join, $columns);
+    ) {
+        $sensorReadings = [];
+        $sensorIds = self::getSensorIds();
+        $sensorGraphData = [];
+        foreach ($sensorIds as $sensorId) {
+            if (str_starts_with($sensorId, 'TB')) {
+                $sensorId = strtolower($sensorId);
+            }
+            $sensorReadings[$sensorId] = self::getDbRecordsByStationId($sensorId, $after);
+            foreach ($sensorReadings[$sensorId] as $reading) {
+                $sensorGraphData[$sensorId][] = ['x' => (1000 * $reading['timestamp']), 'y' => $reading['temperature']];
+            }
+        }
+        return $sensorGraphData;
+    }
 
-        return $records;
+    public static function tempToColor(float $value, int $min = 58, int $max = 72)
+    {
+        $gradientColors = array_reverse(self::gradient());
+        // Ensure value is in range
+        if ($value < $min) {
+            $value = $min;
+        }
+        if ($value > $max) {
+            $value = $max;
+        }
+
+        // Normalize min-max range to [0, positive_value]
+        $max -= $min;
+        $value -= $min;
+        $min = 0;
+
+        // Calculate distance from min to max in [0,1]
+        $distFromMin = $value / $max;
+
+        // Define start and end color
+        if (count($gradientColors) == 0) {
+            return self::colorFromRange($value, $min, $max, ['#CC0000', '#EEEE00', '#00FF00']);
+        } elseif (count($gradientColors) == 2) {
+            $startColor = $gradientColors[0];
+            $endColor = $gradientColors[1];
+        } elseif (count($gradientColors) > 2) {
+            $startColor = $gradientColors[floor($distFromMin * (count($gradientColors) - 1))];
+            $endColor = $gradientColors[ceil($distFromMin * (count($gradientColors) - 1))];
+
+            $distFromMin *= count($gradientColors) - 1;
+            while ($distFromMin > 1) {
+                $distFromMin--;
+            }
+        } else {
+            die("Please pass more than one color or null to use default red-green colors.");
+        }
+
+        // Remove hex from string
+        if ($startColor[0] === '#') {
+            $startColor = substr($startColor, 1);
+        }
+        if ($endColor[0] === '#') {
+            $endColor = substr($endColor, 1);
+        }
+
+        // Parse hex
+        list($ra, $ga, $ba) = sscanf("#$startColor", "#%02x%02x%02x");
+        list($rz, $gz, $bz) = sscanf("#$endColor", "#%02x%02x%02x");
+
+        // Get rgb based on
+        $distDiff = 1 - $distFromMin;
+        $r = intval(($rz * $distFromMin) + ($ra * $distDiff));
+        $r = min(max(0, $r), 255);
+        $g = intval(($gz * $distFromMin) + ($ga * $distDiff));
+        $g = min(max(0, $g), 255);
+        $b = intval(($bz * $distFromMin) + ($ba * $distDiff));
+        $b = min(max(0, $b), 255);
+
+        // Convert rgb back to hex
+        $rgbColorAsHex = '#' .
+            str_pad(dechex($r), 2, "0", STR_PAD_LEFT) .
+            str_pad(dechex($g), 2, "0", STR_PAD_LEFT) .
+            str_pad(dechex($b), 2, "0", STR_PAD_LEFT);
+
+        return $rgbColorAsHex;
+    }
+
+    public static function gradient($HexFrom = 'ff7e00', $HexTo = 'fff3e7', $ColorSteps = 50)
+    {
+        $FromRGB['r'] = hexdec(substr($HexFrom, 0, 2));
+        $FromRGB['g'] = hexdec(substr($HexFrom, 2, 2));
+        $FromRGB['b'] = hexdec(substr($HexFrom, 4, 2));
+
+        $ToRGB['r'] = hexdec(substr($HexTo, 0, 2));
+        $ToRGB['g'] = hexdec(substr($HexTo, 2, 2));
+        $ToRGB['b'] = hexdec(substr($HexTo, 4, 2));
+
+        $StepRGB['r'] = ($FromRGB['r'] - $ToRGB['r']) / ($ColorSteps - 1);
+        $StepRGB['g'] = ($FromRGB['g'] - $ToRGB['g']) / ($ColorSteps - 1);
+        $StepRGB['b'] = ($FromRGB['b'] - $ToRGB['b']) / ($ColorSteps - 1);
+
+        $GradientColors = array();
+
+        for ($i = 0; $i <= $ColorSteps; $i++) {
+            $RGB['r'] = floor($FromRGB['r'] - ($StepRGB['r'] * $i));
+            $RGB['g'] = floor($FromRGB['g'] - ($StepRGB['g'] * $i));
+            $RGB['b'] = floor($FromRGB['b'] - ($StepRGB['b'] * $i));
+
+            $HexRGB['r'] = sprintf('%02x', ($RGB['r']));
+            $HexRGB['g'] = sprintf('%02x', ($RGB['g']));
+            $HexRGB['b'] = sprintf('%02x', ($RGB['b']));
+
+            $GradientColors[] = implode('', $HexRGB);
+        }
+        return array_filter($GradientColors, function ($val) {
+            return strlen($val) == 6;
+        });
     }
 }
