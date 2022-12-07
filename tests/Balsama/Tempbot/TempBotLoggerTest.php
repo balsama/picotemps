@@ -6,7 +6,6 @@ use PHPUnit\Framework\TestCase;
 
 class TempBotLoggerTest extends TestCase
 {
-
     public function testLog()
     {
         TempBotLogger::logNotice('foo');
