@@ -191,8 +191,11 @@ class Helpers
         return null;
     }
 
-    public static function fetch(string $url, int $retry = 1, Client $client = new Client()): ?Response
-    {
+    public static function fetch(
+        string $url,
+        int $retry = 2,
+        Client $client = new Client()
+    ): ?Response {
         try {
             return $client->get($url, [
                 'timeout' => 6,
@@ -201,7 +204,7 @@ class Helpers
         } catch (\Throwable $e) {
             if ($retry) {
                 $retry--;
-                self::fetch($url, $retry, $client);
+                return self::fetch($url, $retry, $client);
             }
             if (in_array($url, self::getSensorIps())) {
                 $tbid = self::getSensorIdByIp($url);
@@ -209,7 +212,7 @@ class Helpers
                 echo "Sensor '$tbid' appears to be unreachable at $url." . PHP_EOL;
             } elseif ($url === self::BOSTON_STATION_URL) {
                 echo $e->getMessage() . PHP_EOL;
-                echo "Boston weather station at appears to be unreachable at $url." . PHP_EOL;
+                echo "Boston weather station appears to be unreachable at $url." . PHP_EOL;
             } else {
                 echo $e->getMessage() . PHP_EOL;
             }

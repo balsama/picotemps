@@ -2,11 +2,12 @@
 
 namespace Balsama\Tempbot;
 
-use GuzzleHttp\Client;
+use PHPUnit\Framework\TestCase;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Client;
 
-class HelpersTest extends \PHPUnit\Framework\TestCase
+class HelpersTest extends TestCase
 {
     public function testGetLoganReading()
     {
@@ -24,7 +25,7 @@ class HelpersTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue(true);
     }
 
-    public function testGetCurrentBostonObservations()
+    public function testFetch()
     {
         $mock = new MockHandler([
             new \Exception('Mock exception'),
@@ -33,5 +34,7 @@ class HelpersTest extends \PHPUnit\Framework\TestCase
         $handlerStack = HandlerStack::create($mock);
         $client = new Client(['handler' => $handlerStack]);
         $this->assertNull(Helpers::getCurrentBostonObservations($client));
+        $response = Helpers::fetch('example.com', 1, $client);
+        $this->assertNull($response);
     }
 }
