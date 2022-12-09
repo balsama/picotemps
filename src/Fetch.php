@@ -32,6 +32,7 @@ class Fetch
             ]);
         } catch (\Throwable $e) {
             if ($retry) {
+                TempBotLogger::logWarn("Sensor at $url didn't respond. Trying $retry more times.");
                 $retry--;
                 return self::fetch($url, $retry, $client);
             }

@@ -2,7 +2,7 @@
 
 namespace Balsama\Tempbot;
 
-use Monolog\Formatter\HtmlFormatter;
+use Monolog\Formatter\JsonFormatter;
 use Monolog\Level;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
@@ -15,6 +15,12 @@ class TempBotLogger
     {
         $log = self::init();
         $log->error($message);
+    }
+
+    public static function logWarn(string $message): void
+    {
+        $log = self::init();
+        $log->warning($message);
     }
 
     public static function logNotice(string $message): void
@@ -33,7 +39,7 @@ class TempBotLogger
     {
         $log = new Logger('Tempbot Log');
         $streamHandler = new StreamHandler(self::LOGPATH, Level::Warning);
-        $streamHandler->setFormatter(new HtmlFormatter());
+        $streamHandler->setFormatter(new JsonFormatter());
         $log->pushHandler($streamHandler);
         return $log;
     }
