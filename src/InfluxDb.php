@@ -8,16 +8,26 @@ use InfluxDB2\Point;
 
 class InfluxDb
 {
-    private const INFLUX_TOKEN = '_dNPcvw2SRpRsGJDHtc6_WiAb1WVf4zXHEU7Ng7WIQjmRwMvEtVdL5Qq_lNNbVm86OsYXxzbIQMwKGBjMm8wYQ==';
+    private string $influx_token;
 
     public Client $client;
 
     public function __construct()
-    {}
+    {
+        $this->influx_token = $this->getInfluxToken();
+    }
+
+    private function getInfluxToken() :string
+    {
+        if (file_exists(__DIR__ . '/../../../keys/TEMPBOT_INFLUX_TOKEN')) {
+            return trim(file_get_contents(__DIR__ . '/../../../keys/TEMPBOT_INFLUX_TOKEN'));
+        }
+        return trim(file_get_contents(__DIR__ . '/../../keys/TEMPBOT_INFLUX_TOKEN'));
+    }
 
     public function getClient()
     {
-        $token = self::INFLUX_TOKEN;
+        $token = $this->influx_token;
 
         $client = new Client([
             "url" => "http://192.168.7.162:8086",
