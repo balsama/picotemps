@@ -9,7 +9,7 @@ class SensorReading
 {
     private string $ip;
     private ?Response $response;
-    private ?\stdClass $responseBody;
+    public ?\stdClass $responseBody;
     private Client $client;
     private string $responseType;
 

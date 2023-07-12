@@ -53,7 +53,7 @@ class Helpers
     }
 
 
-/**
+    /**
      * @return SensorReading[]
      */
     public static function getSensorReadings(array $sensorIds): array
@@ -146,6 +146,25 @@ class Helpers
                 'humidity' => $sensorReading->getHumidity(),
             ]
         );
+    }
+
+    public static function writeInfluxDb(array $sensorReadings)
+    {
+        $readings = array_filter($sensorReadings, function($obj){
+            if (isset($obj->responseBody)) {
+                return true;
+            }
+            return false;
+        });
+
+        $influx = new InfluxDb();
+        foreach ($readings as $reading) {
+            $influx->write(
+                $reading->getTbId(),
+                $reading->getTemp(),
+                $reading->getHumidity(),
+            );
+        }
     }
 
     /**

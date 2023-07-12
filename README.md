@@ -1,6 +1,6 @@
 # Full apartment temperature and humidity monitoring
 1. A network of Raspberry Pi Pico Ws with DHT22 sensors from which temperature and humidity data is served via http requests.
-2. A centralized client which pulls data from the Picos and dumps it into CSV files and Google Sheets.
+2. A centralized client which pulls data from the Picos and dumps it into CSV files/Google Sheets/InfluxData.
 
 ![Example Chart](images/example-graph.png "Example Chart")
 

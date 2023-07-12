@@ -1,12 +1,14 @@
 {
     "name": "balsama/picotemps",
-    "description": "Grabs temps from a network of Raspbery Pi Pico Ws and sends them to google sheets",
+    "description": "Grabs temps from a network of Raspbery Pi Pico Ws and sends them to a local InfluxData instance.",
     "type": "project",
     "require": {
-        "guzzlehttp/guzzle": "^7",
+        "guzzlehttp/guzzle": "^7.7",
         "revolution/laravel-google-sheets": "^6.0",
         "catfan/medoo": "^2.1",
-        "monolog/monolog": "^3.2"
+        "monolog/monolog": "^3.2",
+        "php": "^8.1",
+        "influxdata/influxdb-client-php": "^3.3"
     },
     "require-dev": {
         "phpunit/phpunit": "^10",
@@ -23,5 +25,10 @@
     "scripts": {
         "lint": "./vendor/bin/phpcs --standard=PSR12 ./src ./tests",
         "test": "./vendor/bin/phpunit tests"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
     }
 }
