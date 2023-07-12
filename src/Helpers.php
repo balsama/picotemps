@@ -42,7 +42,7 @@ class Helpers
             'TB0301' => '192.168.7.152',
             'TB0302' => '192.168.7.156',
             'TB0401' => '192.168.7.159',
-            'KBOS' => 'api.weather.gov/stations/KBOS/observations/latest',
+            'KBOS' => self::BOSTON_STATION_URL,
         ];
     }
 
