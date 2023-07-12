@@ -12,7 +12,7 @@ class Fetch
 {
     private Logger $log;
     private const LOGPATH = __DIR__ . '/../logs/tempbot.log';
-    private const BOSTON_STATION_URL = 'api.weather.gov/stations/KBOS/observations/latest';
+    private const BOSTON_STATION_URL = Helpers::BOSTON_STATION_URL;
 
     public function __construct()
     {

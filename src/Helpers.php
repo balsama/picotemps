@@ -10,7 +10,7 @@ use stdClass;
 
 class Helpers
 {
-    private const BOSTON_STATION_URL = 'api.weather.gov/stations/KBOS/observations/latest';
+    public const BOSTON_STATION_URL = 'api.weather.gov/stations/0258W/observations/latest';
 
     public static function getSensorIds(): array
     {
