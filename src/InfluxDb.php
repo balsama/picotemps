@@ -56,7 +56,8 @@ class InfluxDb
             ->addField("humidity", $humidity)
             ->time($time);
 
-        $writeApi->write($point, WritePrecision::S, $bucket, $org);
+        $write = $writeApi->write($point, WritePrecision::S, $bucket, $org);
+        $foo = 21;
         $writeApi->close();
     }
 }

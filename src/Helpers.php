@@ -4,13 +4,13 @@ namespace Balsama\Tempbot;
 
 use Exception;
 use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Response;
 use Medoo\Medoo;
 use stdClass;
 
 class Helpers
 {
-    public const BOSTON_STATION_URL = 'api.weather.gov/stations/0258W/observations/latest';
+    public const BC_STATION_URL = 'api.weather.gov/stations/0258W/observations/latest';
+    public const LOGAN_STATION_URL = 'api.weather.gov/stations/KBOS/observations/latest';
 
     public static function getSensorIds(): array
     {
@@ -42,7 +42,8 @@ class Helpers
             'TB0301' => '192.168.7.152',
             'TB0302' => '192.168.7.156',
             'TB0401' => '192.168.7.159',
-            'KBOS' => self::BOSTON_STATION_URL,
+            'LOGAN' => self::LOGAN_STATION_URL,
+            'BC' => self::BC_STATION_URL,
         ];
     }
 
@@ -75,44 +76,6 @@ class Helpers
      * @return void
      * @throws Exception
      */
-    public static function writeSensorsCsvLine(array $sensorReadings): void
-    {
-        $date = new \DateTimeImmutable('now', new \DateTimeZone('America/New_York'));
-        $datetime = $date->format('Y-m-d H:i:s');
-
-        $outside = Helpers::getCurrentBostonObservations();
-        if (!$outside->properties->relativeHumidity->value) {
-            // Sometimes the API returns this as null, in which case we can't pass it off to the converter.
-            $outsideTemp = null;
-        } else {
-            $outsideTemp = Helpers::c2f((float) $outside->properties->temperature->value);
-        }
-        if (!$outside->properties->relativeHumidity->value) {
-            $outsideHumidity = null;
-        } else {
-            $outsideHumidity = $outside->properties->relativeHumidity->value;
-        }
-
-        $recordLine = new RecordEntry(
-            $datetime,
-            $outsideTemp,
-            $outsideHumidity,
-            $sensorReadings['TB0101']->getTemp(),
-            $sensorReadings['TB0201']->getTemp(),
-            $sensorReadings['TB0301']->getTemp(),
-            $sensorReadings['TB0302']->getTemp(),
-            $sensorReadings['TB0401']->getTemp(),
-            $sensorReadings['TB0101']->getHumidity(),
-            $sensorReadings['TB0201']->getHumidity(),
-            $sensorReadings['TB0301']->getHumidity(),
-            $sensorReadings['TB0302']->getHumidity(),
-            $sensorReadings['TB0401']->getHumidity(),
-        );
-
-        $csvLine = $recordLine->getArray();
-
-        self::csv([], [$csvLine], 'temps.csv', true, __DIR__ . '/../data/');
-    }
 
     public static function writeSensorReadingsDb(array $sensorReadings)
     {
@@ -159,11 +122,12 @@ class Helpers
 
         $influx = new InfluxDb();
         foreach ($readings as $reading) {
-            $influx->write(
+            $write = $influx->write(
                 $reading->getTbId(),
                 $reading->getTemp(),
                 $reading->getHumidity(),
             );
+            $bar = 21;
         }
     }
 
@@ -200,15 +164,6 @@ class Helpers
             fputcsv($fp, $datum);
         }
         fclose($fp);
-    }
-
-    public static function getCurrentBostonObservations(Client $client = new Client()): ?stdClass
-    {
-        $url = self::BOSTON_STATION_URL;
-        if ($response = Fetch::fetch($url, 1, $client)) {
-            return json_decode($response->getBody());
-        }
-        return null;
     }
 
     public static function c2f(float $c): float

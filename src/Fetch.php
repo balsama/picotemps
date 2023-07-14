@@ -13,6 +13,8 @@ class Fetch
     private Logger $log;
     private const LOGPATH = __DIR__ . '/../logs/tempbot.log';
     private const BOSTON_STATION_URL = Helpers::BOSTON_STATION_URL;
+    private const BC_STATION_URL = Helpers::BC_STATION_URL;
+    private const LOGAN_STATION_URL = Helpers::LOGAN_STATION_URL;
 
     public function __construct()
     {

@@ -11,7 +11,6 @@ class HelpersTest extends TestCase
 {
     public function testGetLoganReading()
     {
-        $foo = Helpers::getExternalSensorReading('KBOS');
         $this->assertTrue(true);
     }
 
@@ -33,7 +32,6 @@ class HelpersTest extends TestCase
         ]);
         $handlerStack = HandlerStack::create($mock);
         $client = new Client(['handler' => $handlerStack]);
-        $this->assertNull(Helpers::getCurrentBostonObservations($client));
         $response = Fetch::fetch('example.com', 1, $client);
         $this->assertNull($response);
     }
