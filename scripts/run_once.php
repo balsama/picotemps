@@ -11,6 +11,6 @@ use Balsama\Tempbot\Helpers;
 
 $sensorIds = Helpers::getSensorIds();
 $sensors = Helpers::getSensorReadings($sensorIds);
-Helpers::writeSensorReadingsDb($sensors);
+Helpers::writeInfluxDb($sensors);
 
 exit(0);
