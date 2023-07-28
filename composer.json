@@ -4,9 +4,6 @@
     "type": "project",
     "require": {
         "guzzlehttp/guzzle": "^7.7",
-        "revolution/laravel-google-sheets": "^6.0",
-        "catfan/medoo": "^2.1",
-        "monolog/monolog": "^3.2",
         "php": "^8.1",
         "influxdata/influxdb-client-php": "^3.3"
     },

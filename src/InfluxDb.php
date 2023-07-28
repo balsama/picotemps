@@ -8,35 +8,17 @@ use InfluxDB2\Point;
 
 class InfluxDb
 {
-    private string $influx_token;
-
+    private const INFLUX_URL = 'http://192.168.7.162:8086';
     public Client $client;
-
-    public function __construct()
-    {
-        $this->influx_token = $this->getInfluxToken();
-    }
-
-    private function getInfluxToken() :string
-    {
-        if (file_exists(__DIR__ . '/../../../keys/TEMPBOT_INFLUX_TOKEN')) {
-            return trim(file_get_contents(__DIR__ . '/../../../keys/TEMPBOT_INFLUX_TOKEN'));
-        }
-        return trim(file_get_contents(__DIR__ . '/../../keys/TEMPBOT_INFLUX_TOKEN'));
-    }
 
     public function getClient()
     {
-        $token = $this->influx_token;
-
-        $client = new Client([
-            "url" => "http://192.168.7.162:8086",
+        $token = $this->getInfluxToken();
+        return new Client([
+            "url" => self::INFLUX_URL,
             "token" => $token,
         ]);
-
-        return $client;
     }
-
 
     public function write($sensorId, $temperature, $humidity, $time = null)
     {
@@ -56,8 +38,15 @@ class InfluxDb
             ->addField("humidity", $humidity)
             ->time($time);
 
-        $write = $writeApi->write($point, WritePrecision::S, $bucket, $org);
-        $foo = 21;
+        $writeApi->write($point, WritePrecision::S, $bucket, $org);
         $writeApi->close();
+    }
+
+    private function getInfluxToken(): string
+    {
+        if (file_exists(__DIR__ . '/../../../keys/TEMPBOT_INFLUX_TOKEN')) {
+            return trim(file_get_contents(__DIR__ . '/../../../keys/TEMPBOT_INFLUX_TOKEN'));
+        }
+        return trim(file_get_contents(__DIR__ . '/../../keys/TEMPBOT_INFLUX_TOKEN'));
     }
 }

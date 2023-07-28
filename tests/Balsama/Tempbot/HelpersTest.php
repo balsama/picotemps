@@ -14,16 +14,6 @@ class HelpersTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testGetDbRecords()
-    {
-        $foo = Helpers::getDbRecordsByStationId('KBOS');
-        $bar = Helpers::getDbRecordsByStationId('KBOS', null, 1668657853);
-        $baz = Helpers::getDbRecordsByStationId('KBOS', 1668657831, null);
-        $bat = Helpers::getDbRecordsByStationId('KBOS', 1668657811, 1668659363);
-        $bee = Helpers::getDbRecordsByStationId('tb0201');
-        $this->assertTrue(true);
-    }
-
     public function testFetch()
     {
         $mock = new MockHandler([

@@ -10,9 +10,6 @@ $i = 1;
 while (true) {
     $sensorIds = Helpers::getSensorIds();
     $sensors = Helpers::getSensorReadings($sensorIds);
-
-    //Helpers::writeSensorsCsvLine($sensors);
-    //Helpers::writeSensorReadingsDb($sensors);
     Helpers::writeInfluxDb($sensors);
 
     sleep(INTERVAL);
