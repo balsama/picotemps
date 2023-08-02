@@ -8,6 +8,7 @@ use GuzzleHttp\Client;
 class SensorReading
 {
     private string $ip;
+    private string $id;
     private ?Response $response;
     public ?\stdClass $responseBody;
     private Client $client;
@@ -17,6 +18,7 @@ class SensorReading
     {
         $this->client = $client;
         $this->ip = Helpers::getSensorIpById($sensorId);
+        $this->id = $sensorId;
         $this->response = $this->getReading();
         $this->responseBody = ($this->response) ? json_decode($this->response->getBody()) : null;
         $this->responseType = $this->getType();
@@ -36,6 +38,7 @@ class SensorReading
         }
         return Helpers::c2f($this->responseBody->temperature);
     }
+
     public function getHumidity()
     {
         if (!$this->response) {
@@ -46,10 +49,11 @@ class SensorReading
         }
         return $this->responseBody->humidity;
     }
-    public function getTbId()
+
+    public function getTbId(): string
     {
         if (!$this->response) {
-            return null;
+            return $this->id;
         }
         if ($this->responseType === 'weather.gov') {
             $stationParts = explode('/', $this->responseBody->properties->station);
