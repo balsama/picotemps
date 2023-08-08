@@ -1,0 +1,19 @@
+sensors:
+  tb0101: '192.168.7.161'
+  tb0102: '192.168.7.184'
+  tb0201: '192.168.7.160'
+  tb0301: '192.168.7.152'
+  tb0302: '192.168.7.156'
+  tb0401: '192.168.7.159'
+  LOGAN: 'api.weather.gov/stations/KBOS/observations/latest'
+  BC: 'api.weather.gov/stations/0258W/observations/latest'
+influx:
+  url:
+    host: 'http://192.168.7.162'
+    port: '8086'
+    path: ''
+  token:
+    path: '/Users/butler/keys/'
+    name: 'TEMPBOT_INFLUX_TOKEN'
+  org: 'tempbot'
+  bucket: 'picotemps'

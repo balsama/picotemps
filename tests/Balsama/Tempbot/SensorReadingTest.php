@@ -8,13 +8,10 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\HandlerStack;
 
-/**
- * @note Currently requires access to LAN.
- */
 class SensorReadingTest extends TestCase
 {
     private SensorReading $sensor;
-    private const SENSORID = 'TB0101';
+    private const SENSORID = 'tb0101';
     private const TEMP = 20.2;
     private const HUMIDITY = 50.1;
 
@@ -39,7 +36,7 @@ class SensorReadingTest extends TestCase
     {
         $temp = $this->sensor->getTemp();
         $this->assertIsFloat($temp);
-        $this->assertEquals(Helpers::c2f(self::TEMP), $temp);
+        $this->assertEquals(Helpers::celsiusToFahrenheit(self::TEMP), $temp);
     }
 
     public function testGetId()

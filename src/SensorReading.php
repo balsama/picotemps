@@ -32,11 +32,11 @@ class SensorReading
         }
         if ($this->responseType === 'weather.gov') {
             if ($this->responseBody->properties->temperature->value) {
-                return Helpers::c2f($this->responseBody->properties->temperature->value);
+                return Helpers::celsiusToFahrenheit($this->responseBody->properties->temperature->value);
             }
             return null;
         }
-        return Helpers::c2f($this->responseBody->temperature);
+        return Helpers::celsiusToFahrenheit($this->responseBody->temperature);
     }
 
     public function getHumidity()
