@@ -8,22 +8,21 @@ use InfluxDB2\Point;
 
 class InfluxDb
 {
-    private const INFLUX_URL = 'http://192.168.7.162:8086';
     public Client $client;
 
     public function getClient()
     {
         $token = $this->getInfluxToken();
         return new Client([
-            "url" => self::INFLUX_URL,
+            "url" => self::getInfluxUrl(),
             "token" => $token,
         ]);
     }
 
     public function write($sensorId, $temperature, $humidity, $time = null)
     {
-        $org = 'tempbot';
-        $bucket = 'picotemps';
+        $org = Helpers::getConfig(['influx', 'org']);
+        $bucket = Helpers::getConfig(['influx', 'bucket']);
         $client = $this->getClient();
 
         if (!$time) {
@@ -44,9 +43,13 @@ class InfluxDb
 
     private function getInfluxToken(): string
     {
-        if (file_exists(__DIR__ . '/../../../keys/TEMPBOT_INFLUX_TOKEN')) {
-            return trim(file_get_contents(__DIR__ . '/../../../keys/TEMPBOT_INFLUX_TOKEN'));
-        }
-        return trim(file_get_contents(__DIR__ . '/../../keys/TEMPBOT_INFLUX_TOKEN'));
+        $config = Helpers::getConfig(['influx', 'token']);
+        return trim(file_get_contents($config['path'] . $config['name']));
+    }
+
+    public function getInfluxUrl(): string
+    {
+        $influxConfig = Helpers::getConfig(['influx', 'url']);
+        return implode(':', [$influxConfig['host'], $influxConfig['port']]) . $influxConfig['path'];
     }
 }

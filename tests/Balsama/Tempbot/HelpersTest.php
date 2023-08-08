@@ -25,4 +25,21 @@ class HelpersTest extends TestCase
         $response = Fetch::fetch('example.com', 1, $client);
         $this->assertNull($response);
     }
+
+    public function testGetConfig()
+    {
+        $allConfig = Helpers::getConfig();
+        $this->assertIsArray($allConfig);
+        $this->assertCount(2, $allConfig);
+
+        $sensorsConfig = Helpers::getConfig(['sensors']);
+        $this->assertIsArray($sensorsConfig);
+
+        $influxUrlConfig = Helpers::getConfig(['influx', 'url']);
+        $this->assertIsArray($influxUrlConfig);
+        $this->assertCount(3, $influxUrlConfig);
+
+        $influxOrg = Helpers::getConfig(['influx', 'org']);
+        $this->assertIsString($influxOrg);
+    }
 }

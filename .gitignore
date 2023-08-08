@@ -3,3 +3,4 @@
 /databases
 /logs
 .phpunit.result.cache
+/config/config.yml

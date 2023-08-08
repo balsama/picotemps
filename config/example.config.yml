@@ -1,0 +1,17 @@
+sensors:
+  # The key for each sensor should match the Sensor ID in the `tempbotconfig.py` file on each pico sensor.
+  # @see README.md and /picofiles/tempbotconfig.py.
+  tb0101: '192.168.1.1'
+  sensor_id_2: '192.168.1.2'
+  sensor_id_3: '192.168.1.3'
+  external_sensor_1: 'api.weather.gov/stations/KBOS/observations/latest'
+influx:
+  url:
+    host: 'http://192.168.1.100'
+    port: '8086'
+    path: ''
+  token:
+    path: '/path/to/token/'
+    name: 'TEMPBOT_INFLUX_TOKEN'
+  org: 'tempbot'
+  bucket: 'picotemps'

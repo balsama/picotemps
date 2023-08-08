@@ -32,5 +32,8 @@ jobs:
     - name: Lint
       run: composer run-script lint
 
+    - name: Setup
+      run: cp config/example.config.yml config/config.yml
+
     - name: Run test suite
       run: composer run-script test
