@@ -25,21 +25,22 @@ class SensorReading
         // @todo Sensor Reading should provide its own timestamp.
     }
 
-    public function getTemp()
+    public function getTemp(): ?float
     {
         if (!$this->response) {
             return null;
         }
-        if ($this->responseType === 'weather.gov') {
-            if ($this->responseBody->properties->temperature->value) {
-                return Helpers::celsiusToFahrenheit($this->responseBody->properties->temperature->value);
-            }
+        $rawTemp = $this->getRawTemp();
+        if (!$rawTemp) {
             return null;
         }
-        return Helpers::celsiusToFahrenheit($this->responseBody->temperature);
+        if ($this->isOutSideRange($rawTemp)) {
+            return null;
+        }
+        return Helpers::celsiusToFahrenheit($rawTemp);
     }
 
-    public function getHumidity()
+    public function getHumidity(): ?float
     {
         if (!$this->response) {
             return null;
@@ -76,5 +77,27 @@ class SensorReading
             return 'lan';
         }
         return 'weather.gov';
+    }
+
+    private function isOutSideRange(int $value, int $low = -25, int $high = 45): bool
+    {
+        if ($value < $low) {
+            return true;
+        }
+        if ($value > $high) {
+            return true;
+        }
+        return false;
+    }
+
+    private function getRawTemp(): ?float
+    {
+        if ($this->responseType === 'weather.gov') {
+            if ($this->responseBody->properties->temperature->value) {
+                return $this->responseBody->properties->temperature->value;
+            }
+            return null;
+        }
+        return $this->responseBody->temperature;
     }
 }
