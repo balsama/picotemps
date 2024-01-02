@@ -31,7 +31,6 @@ class SensorReading
             return null;
         }
         if ($this->responseType === 'weather.gov') {
-            $foo = 21;
             if ($this->responseBody->properties->temperature->value) {
                 return Helpers::celsiusToFahrenheit($this->responseBody->properties->temperature->value);
             }
