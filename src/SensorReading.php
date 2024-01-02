@@ -39,15 +39,15 @@ class SensorReading
         return Helpers::celsiusToFahrenheit($this->responseBody->temperature);
     }
 
-    public function getHumidity()
+    public function getHumidity(): ?float
     {
         if (!$this->response) {
             return null;
         }
         if ($this->responseType === 'weather.gov') {
-            return $this->responseBody->properties->relativeHumidity->value;
+            return (float) $this->responseBody->properties->relativeHumidity->value;
         }
-        return $this->responseBody->humidity;
+        return (float) $this->responseBody->humidity;
     }
 
     public function getTbId(): string

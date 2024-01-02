@@ -2,6 +2,7 @@
 
 namespace Balsama\Tempbot;
 
+use InfluxDB2\ApiException;
 use InfluxDB2\Client;
 use InfluxDB2\Model\WritePrecision;
 use InfluxDB2\Point;
@@ -37,7 +38,16 @@ class InfluxDb
             ->addField("humidity", $humidity)
             ->time($time);
 
-        $writeApi->write($point, WritePrecision::S, $bucket, $org);
+        try {
+            $writeApi->write($point, WritePrecision::S, $bucket, $org);
+        } catch (ApiException $e) {
+            error_log(
+                'Influx write Failed. Humidity a float? `' . $humidity . '` is_float?: ' . is_float((string) $humidity),
+                0
+            );
+            throw $e;
+        }
+
         $writeApi->close();
     }
 

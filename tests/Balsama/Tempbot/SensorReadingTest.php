@@ -51,4 +51,20 @@ class SensorReadingTest extends TestCase
         $humidity = $this->sensor->getHumidity();
         $this->assertEquals(self::HUMIDITY, $humidity);
     }
+
+    public function testGetHumidityAsInt()
+    {
+        $body = [
+            'temperature' => self::TEMP,
+            'humidity' => (int) 100,
+            'id' => self::SENSORID,
+        ];
+        $mock = new MockHandler([
+            new Response(200, [], json_encode($body)),
+        ]);
+        $handlerStack = HandlerStack::create($mock);
+        $client = new Client(['handler' => $handlerStack]);
+        $sensorReading = new SensorReading('LOGAN', $client);
+        $this->assertIsFloat($sensorReading->getHumidity());
+    }
 }
